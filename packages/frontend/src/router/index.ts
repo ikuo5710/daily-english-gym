@@ -28,6 +28,11 @@ const router = createRouter({
       name: 'reflect',
       component: () => import('@/views/ReflectView.vue'),
     },
+    {
+      path: '/history',
+      name: 'history',
+      component: () => import('@/views/HistoryView.vue'),
+    },
   ],
 });
 

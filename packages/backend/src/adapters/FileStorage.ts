@@ -202,3 +202,64 @@ export async function readBinaryFile(filePath: string): Promise<Buffer> {
     );
   }
 }
+
+/**
+ * 年月ディレクトリのパスを取得
+ */
+export function getMonthDirPath(year: number, month: number): string {
+  const monthStr = String(month).padStart(2, '0');
+  return path.join(LOGS_BASE_DIR, `${year}-${monthStr}`);
+}
+
+/**
+ * ディレクトリ内のファイル一覧を取得
+ * @param dirPath ディレクトリパス
+ * @param extension 拡張子でフィルタ (例: '.md')
+ */
+export async function listFiles(dirPath: string, extension?: string): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    let files = entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name);
+
+    if (extension) {
+      files = files.filter((name) => name.endsWith(extension));
+    }
+
+    return files.sort();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return []; // ディレクトリが存在しない場合は空配列
+    }
+    throw new FileStorageError(
+      `Failed to list files in directory: ${dirPath}`,
+      dirPath,
+      error as Error
+    );
+  }
+}
+
+/**
+ * logs配下のサブディレクトリ一覧を取得
+ */
+export async function listMonthDirectories(): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(LOGS_BASE_DIR, { withFileTypes: true });
+    const dirs = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => /^\d{4}-\d{2}$/.test(name)); // YYYY-MM形式のみ
+
+    return dirs.sort().reverse(); // 新しい順
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return []; // logsディレクトリが存在しない場合は空配列
+    }
+    throw new FileStorageError(
+      `Failed to list directories in logs`,
+      LOGS_BASE_DIR,
+      error as Error
+    );
+  }
+}

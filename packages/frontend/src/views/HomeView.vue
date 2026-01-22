@@ -9,6 +9,10 @@ function startLearning() {
   sessionStore.resetSession();
   router.push('/input');
 }
+
+function goToHistory() {
+  router.push('/history');
+}
 </script>
 
 <template>
@@ -22,6 +26,7 @@ function startLearning() {
 
     <div class="action-section">
       <button class="start-button" @click="startLearning">今日の学習を始める</button>
+      <button class="history-button" @click="goToHistory">履歴を見る</button>
     </div>
 
     <div class="features">
@@ -84,6 +89,10 @@ function startLearning() {
 }
 
 .action-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 3rem;
 }
 
@@ -108,6 +117,25 @@ function startLearning() {
 
 .start-button:active {
   transform: translateY(0);
+}
+
+.history-button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 50px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.history-button:hover {
+  background-color: #667eea;
+  color: white;
 }
 
 .features {

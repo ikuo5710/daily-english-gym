@@ -7,10 +7,13 @@ import {
   getLogFilePath,
   getAudioFilePath,
   getTtsAudioFilePath,
+  getMonthDirPath,
   fileExists,
   appendFile,
   writeFile,
   writeBinaryFile,
+  readFile,
+  listFiles,
 } from '../adapters/FileStorage.js';
 
 export interface LogEntry {
@@ -197,4 +200,94 @@ export async function saveTtsAudio(
   await writeBinaryFile(filePath, audioData);
 
   return filePath;
+}
+
+/** ログ一覧のサマリー */
+export interface LogSummary {
+  date: string;
+  sessionCount: number;
+  hasAudio: boolean;
+}
+
+/** セッション詳細 */
+export interface SessionDetail {
+  sessionNumber: number;
+  hasRecording: boolean;
+  hasTts: boolean;
+}
+
+/** ログ詳細レスポンス */
+export interface LogDetailData {
+  date: string;
+  content: string;
+  sessions: SessionDetail[];
+}
+
+/**
+ * 指定月のログ一覧を取得
+ */
+export async function listLogs(year: number, month: number): Promise<LogSummary[]> {
+  const monthDir = getMonthDirPath(year, month);
+  const files = await listFiles(monthDir, '.md');
+
+  const summaries: LogSummary[] = [];
+
+  for (const file of files) {
+    // ファイル名からdateを抽出 (YYYY-MM-DD.md)
+    const date = file.replace('.md', '');
+    if (!isValidDate(date)) continue;
+
+    const filePath = getLogFilePath(date);
+    const sessionCount = await getSessionCount(filePath);
+
+    // 音声ファイルがあるかチェック（セッション1のみ確認）
+    const audioPath = getAudioFilePath(date, 1);
+    const hasAudio = await fileExists(audioPath);
+
+    summaries.push({
+      date,
+      sessionCount,
+      hasAudio,
+    });
+  }
+
+  // 日付の新しい順にソート
+  return summaries.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/**
+ * 指定日のログ詳細を取得
+ */
+export async function getLogDetail(date: string): Promise<LogDetailData> {
+  if (!isValidDate(date)) {
+    throw new ValidationError('Invalid date format (expected YYYY-MM-DD)', 'date', date);
+  }
+
+  const filePath = getLogFilePath(date);
+  const exists = await fileExists(filePath);
+
+  if (!exists) {
+    throw new ValidationError('Log not found', 'date', date);
+  }
+
+  const content = await readFile(filePath);
+  const sessionCount = await getSessionCount(filePath);
+
+  const sessions: SessionDetail[] = [];
+  for (let i = 1; i <= sessionCount; i++) {
+    const recordingPath = getAudioFilePath(date, i);
+    const ttsPath = getTtsAudioFilePath(date, i);
+
+    sessions.push({
+      sessionNumber: i,
+      hasRecording: await fileExists(recordingPath),
+      hasTts: await fileExists(ttsPath),
+    });
+  }
+
+  return {
+    date,
+    content,
+    sessions,
+  };
 }

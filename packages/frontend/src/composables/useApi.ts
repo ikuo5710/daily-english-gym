@@ -12,6 +12,8 @@ import type {
   GenerateFeedbackResponse,
   SaveLogRequest,
   SaveLogResponse,
+  LogListResponse,
+  LogDetailResponse,
   ErrorResponse,
 } from '@daily-english-gym/shared';
 
@@ -277,6 +279,65 @@ export function useApi() {
     }
   }
 
+  /**
+   * TTS音声ファイルを取得する
+   */
+  async function getTtsAudioFile(date: string, session: number): Promise<Blob> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const response = await fetch(`/api/log/tts/${date}/${session}`);
+
+      if (!response.ok) {
+        const errorData = (await response.json().catch(() => ({}))) as ErrorResponse;
+        throw new ApiError(
+          errorData.error || 'TTS音声ファイルの取得に失敗しました',
+          response.status,
+          errorData.details
+        );
+      }
+
+      return response.blob();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * ログ一覧を取得する
+   */
+  async function getLogList(year: number, month: number): Promise<LogListResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      return await fetchJson<LogListResponse>(`/api/log/list?year=${year}&month=${month}`);
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * ログ詳細を取得する
+   */
+  async function getLogDetail(date: string): Promise<LogDetailResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      return await fetchJson<LogDetailResponse>(`/api/log/${date}`);
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     isLoading,
     error,
@@ -289,5 +350,8 @@ export function useApi() {
     saveLog,
     saveLogWithAudio,
     getAudioFile,
+    getTtsAudioFile,
+    getLogList,
+    getLogDetail,
   };
 }

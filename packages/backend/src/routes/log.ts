@@ -5,7 +5,7 @@
 import { Hono } from 'hono';
 import { ValidationError, FileStorageError } from '@daily-english-gym/shared';
 import type { SaveLogRequest, SaveLogResponse } from '@daily-english-gym/shared';
-import { saveLog, saveAudio, saveTtsAudio, getNextSessionNumber } from '../services/LogService.js';
+import { saveLog, saveAudio, saveTtsAudio, getNextSessionNumber, listLogs, getLogDetail } from '../services/LogService.js';
 import { getAudioFilePath, getTtsAudioFilePath, fileExists, readBinaryFile } from '../adapters/FileStorage.js';
 
 const logRoutes = new Hono();
@@ -194,6 +194,73 @@ logRoutes.get('/tts/:date/:session', async (c) => {
     }
     console.error('TTS audio fetch error:', error);
     return c.json({ error: 'Failed to fetch TTS audio' }, 500);
+  }
+});
+
+/**
+ * GET /api/log/list
+ * 指定月のログ一覧を取得
+ */
+logRoutes.get('/list', async (c) => {
+  try {
+    const yearStr = c.req.query('year');
+    const monthStr = c.req.query('month');
+
+    if (!yearStr || !monthStr) {
+      return c.json({ error: 'year and month are required' }, 400);
+    }
+
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+
+    if (isNaN(year) || year < 2000 || year > 2100) {
+      return c.json({ error: 'Invalid year' }, 400);
+    }
+
+    if (isNaN(month) || month < 1 || month > 12) {
+      return c.json({ error: 'Invalid month' }, 400);
+    }
+
+    const logs = await listLogs(year, month);
+
+    return c.json({ logs });
+  } catch (error) {
+    if (error instanceof FileStorageError) {
+      console.error('File storage error:', error);
+      return c.json({ error: 'Failed to list logs' }, 500);
+    }
+    console.error('Log list error:', error);
+    return c.json({ error: 'Failed to list logs' }, 500);
+  }
+});
+
+/**
+ * GET /api/log/:date
+ * 指定日のログ詳細を取得
+ */
+logRoutes.get('/:date', async (c) => {
+  try {
+    const date = c.req.param('date');
+
+    // パラメータ検証
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      return c.json({ error: 'Invalid date format (expected YYYY-MM-DD)' }, 400);
+    }
+
+    const detail = await getLogDetail(date);
+
+    return c.json(detail);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof FileStorageError) {
+      console.error('File storage error:', error);
+      return c.json({ error: 'Failed to get log detail' }, 500);
+    }
+    console.error('Log detail error:', error);
+    return c.json({ error: 'Failed to get log detail' }, 500);
   }
 });
 

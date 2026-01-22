@@ -92,6 +92,32 @@ export interface SaveLogResponse {
   filePath: string;
 }
 
+/** ログサマリー（一覧表示用） */
+export interface LogSummary {
+  date: string;
+  sessionCount: number;
+  hasAudio: boolean;
+}
+
+/** GET /api/log/list レスポンス */
+export interface LogListResponse {
+  logs: LogSummary[];
+}
+
+/** セッション詳細 */
+export interface SessionDetail {
+  sessionNumber: number;
+  hasRecording: boolean;
+  hasTts: boolean;
+}
+
+/** GET /api/log/:date レスポンス */
+export interface LogDetailResponse {
+  date: string;
+  content: string;
+  sessions: SessionDetail[];
+}
+
 // ==================== Error Response ====================
 
 /** エラーレスポンス */

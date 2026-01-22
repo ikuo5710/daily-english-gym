@@ -88,6 +88,8 @@ export interface SaveLogRequest {
   newsTitle: string;
   newsUrl?: string;
   newsContent: string;
+  level1Text: string;
+  level2Text: string;
   speakingQuestion: string;
   spoken: string;
   corrected: string;

@@ -64,6 +64,8 @@ async function saveAndComplete() {
         newsTitle: sessionStore.currentSession.newsInput.title || 'Untitled',
         newsUrl: sessionStore.currentSession.newsInput.sourceUrl,
         newsContent: sessionStore.currentSession.newsInput.content,
+        level1Text: sessionStore.currentSession.generatedTexts?.level1 || '',
+        level2Text: sessionStore.currentSession.generatedTexts?.level2 || '',
         speakingQuestion: sessionStore.speakingQuestion || '',
         spoken: sessionStore.feedback.spoken,
         corrected: sessionStore.feedback.corrected,

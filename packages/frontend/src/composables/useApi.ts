@@ -215,6 +215,8 @@ export function useApi() {
         formData.append('newsUrl', request.newsUrl);
       }
       formData.append('newsContent', request.newsContent);
+      formData.append('level1Text', request.level1Text);
+      formData.append('level2Text', request.level2Text);
       formData.append('speakingQuestion', request.speakingQuestion);
       formData.append('spoken', request.spoken);
       formData.append('corrected', request.corrected);

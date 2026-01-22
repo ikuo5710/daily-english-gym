@@ -21,6 +21,8 @@ export interface LogEntry {
   newsTitle: string;
   newsUrl?: string;
   newsContent: string;
+  level1Text: string;
+  level2Text: string;
   speakingQuestion: string;
   spoken: string;
   corrected: string;
@@ -54,8 +56,14 @@ function formatLogEntry(entry: LogEntry, sessionNumber: number): string {
     markdown += `Source: ${entry.newsUrl}\n\n`;
   }
 
-  markdown += `#### News Content\n\n`;
+  markdown += `#### News Content (Original)\n\n`;
   markdown += `${entry.newsContent}\n\n`;
+
+  markdown += `#### Level 1 (Easy)\n\n`;
+  markdown += `${entry.level1Text}\n\n`;
+
+  markdown += `#### Level 2 (Speaking)\n\n`;
+  markdown += `${entry.level2Text}\n\n`;
 
   markdown += `#### Speaking Question\n\n`;
   markdown += `${entry.speakingQuestion}\n\n`;

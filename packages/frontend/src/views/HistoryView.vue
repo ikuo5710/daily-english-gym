@@ -144,6 +144,8 @@ function parseMarkdownSections(content: string) {
     title: string;
     time: string;
     newsContent: string;
+    level1Text: string;
+    level2Text: string;
     speakingQuestion: string;
     yourResponse: string;
     corrected: string;
@@ -168,7 +170,9 @@ function parseMarkdownSections(content: string) {
     sessions.push({
       title: titleMatch ? titleMatch[1] : 'Untitled',
       time: timeMatch ? timeMatch[1] : '',
-      newsContent: extractSection('News Content'),
+      newsContent: extractSection('News Content \\(Original\\)'),
+      level1Text: extractSection('Level 1 \\(Easy\\)'),
+      level2Text: extractSection('Level 2 \\(Speaking\\)'),
       speakingQuestion: extractSection('Speaking Question'),
       yourResponse: extractSection('Your Response'),
       corrected: extractSection('Corrected'),
@@ -248,8 +252,18 @@ function parseMarkdownSections(content: string) {
               </div>
 
               <div class="section-card news-content">
-                <h4>News Content</h4>
+                <h4>News Content (Original)</h4>
                 <p>{{ session.newsContent }}</p>
+              </div>
+
+              <div v-if="session.level1Text" class="section-card level1-content">
+                <h4>Level 1 (Easy)</h4>
+                <p>{{ session.level1Text }}</p>
+              </div>
+
+              <div v-if="session.level2Text" class="section-card level2-content">
+                <h4>Level 2 (Speaking)</h4>
+                <p>{{ session.level2Text }}</p>
               </div>
 
               <div class="section-card">
@@ -503,6 +517,16 @@ function parseMarkdownSections(content: string) {
 .news-content {
   background-color: #f0f9ff;
   border: 1px solid #bae6fd;
+}
+
+.level1-content {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.level2-content {
+  background-color: #fefce8;
+  border: 1px solid #fde68a;
 }
 
 .upgraded-text {

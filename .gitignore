@@ -12,6 +12,16 @@ dist/
 build/
 *.tsbuildinfo
 
+# Root level build artifacts (prevent tsc from polluting source directories)
+/src/
+/*.js
+!eslint.config.js
+/*.d.ts
+/*.d.ts.map
+packages/frontend/*.js
+packages/frontend/*.d.ts
+packages/frontend/*.d.ts.map
+
 # Environment variables
 .env
 .env.local

@@ -21,6 +21,9 @@ export const useSessionStore = defineStore('session', () => {
   // 録音データ（Blob）
   const recordingBlob = ref<Blob | null>(null);
 
+  // TTS音声データ（Blob）
+  const ttsBlob = ref<Blob | null>(null);
+
   // 文字起こし結果
   const transcription = ref<string | null>(null);
 
@@ -78,6 +81,10 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  function setTtsBlob(blob: Blob): void {
+    ttsBlob.value = blob;
+  }
+
   function setTranscription(text: string): void {
     transcription.value = text;
   }
@@ -108,6 +115,7 @@ export const useSessionStore = defineStore('session', () => {
     currentSession.value = null;
     speakingQuestion.value = null;
     recordingBlob.value = null;
+    ttsBlob.value = null;
     transcription.value = null;
     feedback.value = null;
     isLoading.value = false;
@@ -122,6 +130,7 @@ export const useSessionStore = defineStore('session', () => {
     audioPlaybackSpeed,
     speakingQuestion,
     recordingBlob,
+    ttsBlob,
     transcription,
     feedback,
     // Getters
@@ -132,6 +141,7 @@ export const useSessionStore = defineStore('session', () => {
     setGeneratedTexts,
     setSpeakingQuestion,
     setRecordingBlob,
+    setTtsBlob,
     setTranscription,
     setFeedback,
     setAudioPlaybackSpeed,

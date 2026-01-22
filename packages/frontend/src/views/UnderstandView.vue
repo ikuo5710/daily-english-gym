@@ -73,6 +73,9 @@ async function generateAudio() {
       text: sessionStore.currentSession.generatedTexts.level2,
     });
 
+    // TTS Blobをstoreに保存
+    sessionStore.setTtsBlob(audioBlob);
+
     if (audioUrl.value) {
       URL.revokeObjectURL(audioUrl.value);
     }

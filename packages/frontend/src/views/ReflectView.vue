@@ -57,15 +57,22 @@ async function saveAndComplete() {
   errorMessage.value = null;
 
   try {
-    await api.saveLog({
-      date: sessionStore.currentSession.date,
-      newsTitle: sessionStore.currentSession.newsInput.title || 'Untitled',
-      newsUrl: sessionStore.currentSession.newsInput.sourceUrl,
-      spoken: sessionStore.feedback.spoken,
-      corrected: sessionStore.feedback.corrected,
-      upgraded: sessionStore.feedback.upgraded,
-      comment: sessionStore.feedback.comment,
-    });
+    // 音声ファイルも一緒に保存（録音 + TTS）
+    await api.saveLogWithAudio(
+      {
+        date: sessionStore.currentSession.date,
+        newsTitle: sessionStore.currentSession.newsInput.title || 'Untitled',
+        newsUrl: sessionStore.currentSession.newsInput.sourceUrl,
+        newsContent: sessionStore.currentSession.newsInput.content,
+        speakingQuestion: sessionStore.speakingQuestion || '',
+        spoken: sessionStore.feedback.spoken,
+        corrected: sessionStore.feedback.corrected,
+        upgraded: sessionStore.feedback.upgraded,
+        comment: sessionStore.feedback.comment,
+      },
+      sessionStore.recordingBlob ?? undefined,
+      sessionStore.ttsBlob ?? undefined
+    );
 
     sessionStore.completeSession();
     successMessage.value = '学習ログを保存しました！';

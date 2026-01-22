@@ -43,3 +43,6 @@ test-results/
 
 # Claude Code settings
 .claude/settings.local.json
+
+# Logs (user data - not tracked)
+logs/

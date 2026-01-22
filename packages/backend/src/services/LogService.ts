@@ -3,12 +3,22 @@
  */
 
 import { ValidationError } from '@daily-english-gym/shared';
-import { getLogFilePath, fileExists, appendFile, writeFile } from '../adapters/FileStorage.js';
+import {
+  getLogFilePath,
+  getAudioFilePath,
+  getTtsAudioFilePath,
+  fileExists,
+  appendFile,
+  writeFile,
+  writeBinaryFile,
+} from '../adapters/FileStorage.js';
 
 export interface LogEntry {
   date: string;
   newsTitle: string;
   newsUrl?: string;
+  newsContent: string;
+  speakingQuestion: string;
   spoken: string;
   corrected: string;
   upgraded: string;
@@ -40,6 +50,12 @@ function formatLogEntry(entry: LogEntry, sessionNumber: number): string {
   if (entry.newsUrl) {
     markdown += `Source: ${entry.newsUrl}\n\n`;
   }
+
+  markdown += `#### News Content\n\n`;
+  markdown += `${entry.newsContent}\n\n`;
+
+  markdown += `#### Speaking Question\n\n`;
+  markdown += `${entry.speakingQuestion}\n\n`;
 
   markdown += `#### Your Response\n\n`;
   markdown += `${entry.spoken}\n\n`;
@@ -75,7 +91,7 @@ function formatDateHeader(date: string): string {
 /**
  * ファイルからセッション数をカウント
  */
-async function getSessionCount(filePath: string): Promise<number> {
+export async function getSessionCount(filePath: string): Promise<number> {
   try {
     const { readFile } = await import('../adapters/FileStorage.js');
     const content = await readFile(filePath);
@@ -84,6 +100,15 @@ async function getSessionCount(filePath: string): Promise<number> {
   } catch {
     return 0;
   }
+}
+
+/**
+ * 日付からセッション番号を取得（次のセッション番号）
+ */
+export async function getNextSessionNumber(date: string): Promise<number> {
+  const filePath = getLogFilePath(date);
+  const count = await getSessionCount(filePath);
+  return count + 1;
 }
 
 /**
@@ -118,6 +143,58 @@ export async function saveLog(entry: LogEntry): Promise<string> {
     const logContent = formatLogEntry(entry, 1);
     await writeFile(filePath, header + logContent);
   }
+
+  return filePath;
+}
+
+/**
+ * 録音音声ファイルを保存する
+ * @param date YYYY-MM-DD形式
+ * @param sessionNumber セッション番号
+ * @param audioData 音声データ
+ * @returns 保存先ファイルパス
+ */
+export async function saveAudio(
+  date: string,
+  sessionNumber: number,
+  audioData: Buffer
+): Promise<string> {
+  if (!date || !isValidDate(date)) {
+    throw new ValidationError('Invalid date format (expected YYYY-MM-DD)', 'date', date);
+  }
+
+  if (sessionNumber < 1) {
+    throw new ValidationError('Session number must be positive', 'sessionNumber', sessionNumber);
+  }
+
+  const filePath = getAudioFilePath(date, sessionNumber);
+  await writeBinaryFile(filePath, audioData);
+
+  return filePath;
+}
+
+/**
+ * TTS音声ファイルを保存する
+ * @param date YYYY-MM-DD形式
+ * @param sessionNumber セッション番号
+ * @param audioData 音声データ
+ * @returns 保存先ファイルパス
+ */
+export async function saveTtsAudio(
+  date: string,
+  sessionNumber: number,
+  audioData: Buffer
+): Promise<string> {
+  if (!date || !isValidDate(date)) {
+    throw new ValidationError('Invalid date format (expected YYYY-MM-DD)', 'date', date);
+  }
+
+  if (sessionNumber < 1) {
+    throw new ValidationError('Session number must be positive', 'sessionNumber', sessionNumber);
+  }
+
+  const filePath = getTtsAudioFilePath(date, sessionNumber);
+  await writeBinaryFile(filePath, audioData);
 
   return filePath;
 }

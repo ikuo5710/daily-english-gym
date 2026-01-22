@@ -78,6 +78,8 @@ export interface SaveLogRequest {
   date: string;
   newsTitle: string;
   newsUrl?: string;
+  newsContent: string;
+  speakingQuestion: string;
   spoken: string;
   corrected: string;
   upgraded: string;

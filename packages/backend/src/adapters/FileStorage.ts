@@ -54,7 +54,7 @@ export function getLogFilePath(date: string): string {
 }
 
 /**
- * 日付とセッション番号から音声ファイルパスを生成
+ * 日付とセッション番号から音声ファイルパスを生成（録音）
  * @param date YYYY-MM-DD形式
  * @param sessionNumber セッション番号
  */
@@ -63,6 +63,19 @@ export function getAudioFilePath(date: string, sessionNumber: number): string {
   const monthDir = `${year}-${month}`;
   return sanitizePath(
     path.join(LOGS_BASE_DIR, monthDir, `${date}-${sessionNumber}.webm`)
+  );
+}
+
+/**
+ * 日付とセッション番号からTTS音声ファイルパスを生成
+ * @param date YYYY-MM-DD形式
+ * @param sessionNumber セッション番号
+ */
+export function getTtsAudioFilePath(date: string, sessionNumber: number): string {
+  const [year, month] = date.split('-');
+  const monthDir = `${year}-${month}`;
+  return sanitizePath(
+    path.join(LOGS_BASE_DIR, monthDir, `${date}-${sessionNumber}-tts.mp3`)
   );
 }
 
@@ -164,6 +177,26 @@ export async function writeBinaryFile(
   } catch (error) {
     throw new FileStorageError(
       `Failed to write binary file: ${safePath}`,
+      safePath,
+      error as Error
+    );
+  }
+}
+
+/**
+ * バイナリファイルを読み込む
+ */
+export async function readBinaryFile(filePath: string): Promise<Buffer> {
+  const safePath = sanitizePath(filePath);
+
+  try {
+    return await fs.readFile(safePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new FileStorageError(`File not found: ${safePath}`, safePath);
+    }
+    throw new FileStorageError(
+      `Failed to read binary file: ${safePath}`,
       safePath,
       error as Error
     );

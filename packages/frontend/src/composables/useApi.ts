@@ -195,6 +195,88 @@ export function useApi() {
     }
   }
 
+  /**
+   * ログと音声ファイルを一緒に保存する
+   */
+  async function saveLogWithAudio(
+    request: SaveLogRequest,
+    audioBlob?: Blob,
+    ttsBlob?: Blob
+  ): Promise<SaveLogResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const formData = new FormData();
+      formData.append('date', request.date);
+      formData.append('newsTitle', request.newsTitle);
+      if (request.newsUrl) {
+        formData.append('newsUrl', request.newsUrl);
+      }
+      formData.append('newsContent', request.newsContent);
+      formData.append('speakingQuestion', request.speakingQuestion);
+      formData.append('spoken', request.spoken);
+      formData.append('corrected', request.corrected);
+      formData.append('upgraded', request.upgraded);
+      formData.append('comment', request.comment);
+
+      if (audioBlob) {
+        formData.append('audio', audioBlob, 'recording.webm');
+      }
+
+      if (ttsBlob) {
+        formData.append('ttsAudio', ttsBlob, 'tts.mp3');
+      }
+
+      const response = await fetch('/api/log/save', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json().catch(() => ({}))) as ErrorResponse;
+        throw new ApiError(
+          errorData.error || 'ログ保存に失敗しました',
+          response.status,
+          errorData.details
+        );
+      }
+
+      return response.json() as Promise<SaveLogResponse>;
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * 音声ファイルを取得する
+   */
+  async function getAudioFile(date: string, session: number): Promise<Blob> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const response = await fetch(`/api/log/audio/${date}/${session}`);
+
+      if (!response.ok) {
+        const errorData = (await response.json().catch(() => ({}))) as ErrorResponse;
+        throw new ApiError(
+          errorData.error || '音声ファイルの取得に失敗しました',
+          response.status,
+          errorData.details
+        );
+      }
+
+      return response.blob();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     isLoading,
     error,
@@ -205,5 +287,7 @@ export function useApi() {
     transcribeSpeech,
     generateFeedback,
     saveLog,
+    saveLogWithAudio,
+    getAudioFile,
   };
 }

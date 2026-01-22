@@ -7,11 +7,20 @@ import type { GeneratedTexts } from './session.js';
 
 // ==================== News API ====================
 
-/** POST /api/news/parse リクエスト */
-export interface ParseNewsRequest {
-  type: 'text' | 'url';
+/** POST /api/news/parse リクエスト（テキスト入力） */
+export interface ParseNewsTextRequest {
+  type: 'text';
   content: string;
 }
+
+/** POST /api/news/parse リクエスト（URL入力） */
+export interface ParseNewsUrlRequest {
+  type: 'url';
+  url: string;
+}
+
+/** POST /api/news/parse リクエスト */
+export type ParseNewsRequest = ParseNewsTextRequest | ParseNewsUrlRequest;
 
 /** POST /api/news/parse レスポンス */
 export interface ParseNewsResponse {

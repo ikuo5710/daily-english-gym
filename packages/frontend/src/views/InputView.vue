@@ -9,13 +9,20 @@ const router = useRouter();
 const sessionStore = useSessionStore();
 const api = useApi();
 
+// 入力モード（text or url）
+const inputMode = ref<'text' | 'url'>('text');
+
 const articleContent = ref('');
+const articleUrl = ref('');
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
 const MAX_LENGTH = 10000;
 
 const isValid = computed(() => {
+  if (inputMode.value === 'url') {
+    return articleUrl.value.trim().length > 0;
+  }
   return articleContent.value.trim().length > 0 && articleContent.value.length <= MAX_LENGTH;
 });
 
@@ -29,16 +36,25 @@ async function handleSubmit() {
 
   try {
     // ニュースを解析
-    const parsedNews = await api.parseNews({
-      type: 'text',
-      content: articleContent.value,
-    });
+    const parsedNews =
+      inputMode.value === 'url'
+        ? await api.parseNews({
+            type: 'url',
+            url: articleUrl.value.trim(),
+          })
+        : await api.parseNews({
+            type: 'text',
+            content: articleContent.value,
+          });
 
     // セッション開始
     sessionStore.startNewSession(parsedNews.content);
 
     if (sessionStore.currentSession) {
       sessionStore.currentSession.newsInput.title = parsedNews.title;
+      if (parsedNews.sourceUrl) {
+        sessionStore.currentSession.newsInput.sourceUrl = parsedNews.sourceUrl;
+      }
     }
 
     // 次の画面へ
@@ -66,8 +82,29 @@ function goBack() {
       {{ errorMessage }}
     </div>
 
+    <!-- タブ切り替え -->
+    <div class="input-tabs">
+      <button
+        class="tab-button"
+        :class="{ active: inputMode === 'text' }"
+        @click="inputMode = 'text'"
+        type="button"
+      >
+        テキスト入力
+      </button>
+      <button
+        class="tab-button"
+        :class="{ active: inputMode === 'url' }"
+        @click="inputMode = 'url'"
+        type="button"
+      >
+        URL入力
+      </button>
+    </div>
+
     <form @submit.prevent="handleSubmit">
-      <div class="form-group">
+      <!-- テキスト入力モード -->
+      <div v-if="inputMode === 'text'" class="form-group">
         <label for="article">AIニュース記事を貼り付けてください</label>
         <textarea
           id="article"
@@ -81,8 +118,22 @@ function goBack() {
         </div>
       </div>
 
+      <!-- URL入力モード -->
+      <div v-else class="form-group">
+        <label for="url">ニュース記事のURLを入力してください</label>
+        <input
+          id="url"
+          v-model="articleUrl"
+          type="url"
+          placeholder="https://example.com/news/article"
+          :disabled="isLoading"
+          class="url-input"
+        />
+        <p class="url-hint">TechCrunch、Ars Technica などの主要な英語ニュースサイトに対応しています</p>
+      </div>
+
       <div v-if="isLoading" class="loading-container">
-        <LoadingSpinner message="記事を解析中..." />
+        <LoadingSpinner :message="inputMode === 'url' ? '記事を取得中...' : '記事を解析中...'" />
       </div>
 
       <button v-else type="submit" class="submit-button" :disabled="!isValid">学習を開始する</button>
@@ -173,6 +224,66 @@ function goBack() {
 
 .char-count.over-limit {
   color: #dc2626;
+}
+
+.input-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background: white;
+  color: #666;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.tab-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tab-button.active {
+  border-color: #667eea;
+  background-color: #667eea;
+  color: white;
+}
+
+.url-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.url-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.url-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
 }
 
 .loading-container {

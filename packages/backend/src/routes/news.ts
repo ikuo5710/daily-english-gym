@@ -5,7 +5,7 @@
 import { Hono } from 'hono';
 import { ValidationError } from '@daily-english-gym/shared';
 import type { ParseNewsRequest, ParseNewsResponse } from '@daily-english-gym/shared';
-import { parseNewsContent } from '../services/NewsService.js';
+import { parseNewsContent, fetchArticleFromUrl } from '../services/NewsService.js';
 
 const newsRoutes = new Hono();
 
@@ -17,12 +17,14 @@ newsRoutes.post('/parse', async (c) => {
   try {
     const body = await c.req.json<ParseNewsRequest>();
 
-    // 現在はテキスト入力のみサポート
+    let result;
     if (body.type === 'url') {
-      return c.json({ error: 'URL input is not supported yet' }, 400);
+      // URL入力: 記事を自動取得
+      result = await fetchArticleFromUrl(body.url);
+    } else {
+      // テキスト入力: そのまま解析
+      result = parseNewsContent(body.content);
     }
-
-    const result = parseNewsContent(body.content);
 
     const response: ParseNewsResponse = {
       title: result.title,

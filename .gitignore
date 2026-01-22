@@ -17,10 +17,6 @@ build/
 .env.local
 .env.*.local
 
-# Logs
-logs/
-*.log
-
 # OS files
 .DS_Store
 Thumbs.db
@@ -35,6 +31,8 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+playwright-report/
+test-results/
 
 # Steering files (task management - temporary)
 .steering/*
@@ -43,4 +41,5 @@ coverage/
 # Lock files (keep package-lock.json for consistency)
 # yarn.lock
 
+# Claude Code settings
 .claude/settings.local.json

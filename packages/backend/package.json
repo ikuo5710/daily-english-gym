@@ -1,0 +1,21 @@
+{
+  "name": "@daily-english-gym/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@daily-english-gym/shared": "*",
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.7.0",
+    "openai": "^4.85.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0"
+  }
+}

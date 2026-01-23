@@ -11,7 +11,8 @@ Guidelines:
 - Keep the main ideas and facts from the original
 - Use present simple and past simple tenses mainly
 - Break complex ideas into multiple simple sentences
-- The output should be about 60-70% of the original length
+- **IMPORTANT: Keep the output under 450 words maximum (approximately 2500 characters)**
+- Focus on the most important points if the original is very long
 
 Output ONLY the simplified English text. No explanations or notes.`;
 

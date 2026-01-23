@@ -18,6 +18,12 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['node_modules/**', 'dist/**', '.steering/**'],
+    ignores: [
+      'node_modules/**',
+      '**/node_modules/**',
+      'dist/**',
+      '**/dist/**',
+      '.steering/**',
+    ],
   }
 );

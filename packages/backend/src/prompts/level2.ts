@@ -11,7 +11,8 @@ Guidelines:
 - Use varied sentence structures suitable for speaking
 - Keep sentences at a natural speaking length (10-20 words)
 - Maintain the professional tone but make it conversational
-- The output should be about 80-90% of the original length
+- **IMPORTANT: Keep the output under 450 words maximum (approximately 2500 characters)**
+- Focus on the most important points if the original is very long
 
 Output ONLY the rewritten text. No bullet points, no explanations.`;
 

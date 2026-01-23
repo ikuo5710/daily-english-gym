@@ -12,7 +12,7 @@
     "dev:frontend": "npm run dev -w @daily-english-gym/frontend",
     "dev:backend": "npm run dev -w @daily-english-gym/backend",
     "build": "npm run build -w @daily-english-gym/shared && npm run build --workspaces --if-present",
-    "typecheck": "tsc --build",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

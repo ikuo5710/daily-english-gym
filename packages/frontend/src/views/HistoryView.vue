@@ -180,12 +180,12 @@ function parseMarkdownSections(content: string) {
     const extractSection = (name: string): string => {
       const regex = new RegExp(`#### ${name}\\n\\n([\\s\\S]*?)(?=####|---|$)`);
       const match = sessionBlock.match(regex);
-      return match ? match[1].trim() : '';
+      return match?.[1]?.trim() ?? '';
     };
 
     sessions.push({
-      title: titleMatch ? titleMatch[1] : 'Untitled',
-      time: timeMatch ? timeMatch[1] : '',
+      title: titleMatch?.[1] ?? 'Untitled',
+      time: timeMatch?.[1] ?? '',
       newsContent: extractSection('News Content \\(Original\\)'),
       level1Text: extractSection('Level 1 \\(Easy\\)'),
       level2Text: extractSection('Level 2 \\(Speaking\\)'),

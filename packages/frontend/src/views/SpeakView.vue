@@ -23,6 +23,12 @@ onMounted(async () => {
     return;
   }
 
+  // 録音が既に存在する場合は状態を復元
+  if (sessionStore.recordingBlob) {
+    hasRecording.value = true;
+    recordingDuration.value = sessionStore.currentSession.recording?.duration ?? 0;
+  }
+
   // 質問が既に生成されていればスキップ
   if (sessionStore.speakingQuestion) {
     isLoadingQuestion.value = false;
@@ -87,7 +93,11 @@ function goBack() {
       </div>
 
       <div class="recorder-section">
-        <AudioRecorder @recordingComplete="handleRecordingComplete" />
+        <AudioRecorder
+          :initialBlob="sessionStore.recordingBlob"
+          :initialDuration="recordingDuration"
+          @recordingComplete="handleRecordingComplete"
+        />
       </div>
 
       <div class="action-section">

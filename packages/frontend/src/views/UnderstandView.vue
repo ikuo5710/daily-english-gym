@@ -49,6 +49,16 @@ onMounted(async () => {
     return;
   }
 
+  // キャッシュが存在する場合はスキップ
+  if (sessionStore.currentSession.generatedTexts) {
+    isLoadingTexts.value = false;
+    // TTS音声のキャッシュも復元
+    if (sessionStore.ttsBlob && !audioUrl.value) {
+      audioUrl.value = URL.createObjectURL(sessionStore.ttsBlob);
+    }
+    return;
+  }
+
   // テキスト生成
   try {
     const texts = await api.generateLevels({

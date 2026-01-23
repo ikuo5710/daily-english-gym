@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSessionStore } from '@/stores/session';
 import { useApi } from '@/composables/useApi';
@@ -14,6 +14,20 @@ const inputMode = ref<'text' | 'url'>('text');
 
 const articleContent = ref('');
 const articleUrl = ref('');
+
+// セッションが既に存在する場合は入力内容を復元
+onMounted(() => {
+  if (sessionStore.currentSession) {
+    const newsInput = sessionStore.currentSession.newsInput;
+    if (newsInput.type === 'url' && newsInput.sourceUrl) {
+      inputMode.value = 'url';
+      articleUrl.value = newsInput.sourceUrl;
+    } else {
+      inputMode.value = 'text';
+      articleContent.value = newsInput.content;
+    }
+  }
+});
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
@@ -31,6 +45,23 @@ const charCount = computed(() => articleContent.value.length);
 async function handleSubmit() {
   if (!isValid.value) return;
 
+  // セッションが既に存在し、同じ内容であればそのまま次へ進む
+  if (sessionStore.currentSession) {
+    const currentContent = sessionStore.currentSession.newsInput.content;
+    const newContent = inputMode.value === 'url' ? '' : articleContent.value;
+    const currentUrl = sessionStore.currentSession.newsInput.sourceUrl;
+    const newUrl = inputMode.value === 'url' ? articleUrl.value.trim() : '';
+
+    // 入力内容が変更されていない場合はそのまま次へ
+    if (
+      (inputMode.value === 'text' && currentContent === newContent) ||
+      (inputMode.value === 'url' && currentUrl === newUrl)
+    ) {
+      router.push('/understand');
+      return;
+    }
+  }
+
   isLoading.value = true;
   errorMessage.value = null;
 
@@ -47,7 +78,7 @@ async function handleSubmit() {
             content: articleContent.value,
           });
 
-    // セッション開始
+    // セッション開始（新規または内容変更時）
     sessionStore.startNewSession(parsedNews.content);
 
     if (sessionStore.currentSession) {

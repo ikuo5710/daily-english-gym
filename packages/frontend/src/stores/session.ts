@@ -73,6 +73,9 @@ export const useSessionStore = defineStore('session', () => {
 
   function setRecordingBlob(blob: Blob, duration: number): void {
     recordingBlob.value = blob;
+    // 録音が更新されたら、古いトランスクリプトとフィードバックをクリア
+    transcription.value = null;
+    feedback.value = null;
     if (currentSession.value) {
       currentSession.value.recording = {
         duration,

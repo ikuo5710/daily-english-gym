@@ -93,7 +93,11 @@ function goBack() {
       </div>
 
       <div class="recorder-section">
-        <AudioRecorder @recordingComplete="handleRecordingComplete" />
+        <AudioRecorder
+          :initialBlob="sessionStore.recordingBlob"
+          :initialDuration="recordingDuration"
+          @recordingComplete="handleRecordingComplete"
+        />
       </div>
 
       <div class="action-section">

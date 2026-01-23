@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+
+const props = defineProps<{
+  initialBlob?: Blob | null;
+  initialDuration?: number;
+}>();
 
 const emit = defineEmits<{
   (e: 'recordingComplete', blob: Blob, duration: number): void;
@@ -10,6 +15,27 @@ const isPaused = ref(false);
 const recordingTime = ref(0);
 const audioBlob = ref<Blob | null>(null);
 const audioUrl = ref<string | null>(null);
+
+// 初期値が渡された場合は復元
+onMounted(() => {
+  if (props.initialBlob) {
+    audioBlob.value = props.initialBlob;
+    audioUrl.value = URL.createObjectURL(props.initialBlob);
+    recordingTime.value = props.initialDuration ?? 0;
+  }
+});
+
+// initialBlobが変更された場合も対応
+watch(() => props.initialBlob, (newBlob) => {
+  if (newBlob && !audioBlob.value) {
+    audioBlob.value = newBlob;
+    if (audioUrl.value) {
+      URL.revokeObjectURL(audioUrl.value);
+    }
+    audioUrl.value = URL.createObjectURL(newBlob);
+    recordingTime.value = props.initialDuration ?? 0;
+  }
+});
 
 let mediaRecorder: MediaRecorder | null = null;
 let audioChunks: Blob[] = [];

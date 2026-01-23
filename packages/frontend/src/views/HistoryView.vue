@@ -27,6 +27,9 @@ const logDetail = ref<LogDetailResponse | null>(null);
 const recordingUrls = ref<Map<number, string>>(new Map());
 const ttsUrls = ref<Map<number, string>>(new Map());
 
+// アコーディオン開閉状態（セッションインデックス-セクション名のキーで管理）
+const expandedSections = ref<Set<string>>(new Set());
+
 // 年の選択肢
 const years = computed(() => {
   const current = new Date().getFullYear();
@@ -122,6 +125,19 @@ function cleanupUrls() {
   ttsUrls.value.forEach((url) => URL.revokeObjectURL(url));
   recordingUrls.value.clear();
   ttsUrls.value.clear();
+}
+
+function toggleSection(sessionIndex: number, section: string) {
+  const key = `${sessionIndex}-${section}`;
+  if (expandedSections.value.has(key)) {
+    expandedSections.value.delete(key);
+  } else {
+    expandedSections.value.add(key);
+  }
+}
+
+function isSectionExpanded(sessionIndex: number, section: string): boolean {
+  return expandedSections.value.has(`${sessionIndex}-${section}`);
 }
 
 function goBack() {
@@ -251,19 +267,34 @@ function parseMarkdownSections(content: string) {
                 <h4>{{ session.title }}</h4>
               </div>
 
-              <div class="section-card news-content">
-                <h4>News Content (Original)</h4>
-                <p>{{ session.newsContent }}</p>
+              <div class="section-card news-content accordion">
+                <div class="accordion-header" @click="toggleSection(index, 'original')">
+                  <h4>News Content (Original)</h4>
+                  <span class="accordion-icon">{{ isSectionExpanded(index, 'original') ? '▼' : '▶' }}</span>
+                </div>
+                <div v-if="isSectionExpanded(index, 'original')" class="accordion-content">
+                  <p>{{ session.newsContent }}</p>
+                </div>
               </div>
 
-              <div v-if="session.level1Text" class="section-card level1-content">
-                <h4>Level 1 (Easy)</h4>
-                <p>{{ session.level1Text }}</p>
+              <div v-if="session.level1Text" class="section-card level1-content accordion">
+                <div class="accordion-header" @click="toggleSection(index, 'level1')">
+                  <h4>Level 1 (Easy)</h4>
+                  <span class="accordion-icon">{{ isSectionExpanded(index, 'level1') ? '▼' : '▶' }}</span>
+                </div>
+                <div v-if="isSectionExpanded(index, 'level1')" class="accordion-content">
+                  <p>{{ session.level1Text }}</p>
+                </div>
               </div>
 
-              <div v-if="session.level2Text" class="section-card level2-content">
-                <h4>Level 2 (Speaking)</h4>
-                <p>{{ session.level2Text }}</p>
+              <div v-if="session.level2Text" class="section-card level2-content accordion">
+                <div class="accordion-header" @click="toggleSection(index, 'level2')">
+                  <h4>Level 2 (Speaking)</h4>
+                  <span class="accordion-icon">{{ isSectionExpanded(index, 'level2') ? '▼' : '▶' }}</span>
+                </div>
+                <div v-if="isSectionExpanded(index, 'level2')" class="accordion-content">
+                  <p>{{ session.level2Text }}</p>
+                </div>
               </div>
 
               <div class="section-card">
@@ -503,7 +534,7 @@ function parseMarkdownSections(content: string) {
   font-size: 0.75rem;
   font-weight: 600;
   color: #667eea;
-  margin: 0 0 0.5rem;
+  margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -512,6 +543,34 @@ function parseMarkdownSections(content: string) {
   margin: 0;
   line-height: 1.6;
   white-space: pre-wrap;
+}
+
+/* アコーディオンスタイル */
+.accordion .accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.accordion .accordion-header:hover {
+  opacity: 0.8;
+}
+
+.accordion-icon {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.accordion-content {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.section-card:not(.accordion) h4 {
+  margin-bottom: 0.5rem;
 }
 
 .news-content {

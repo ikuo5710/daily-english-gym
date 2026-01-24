@@ -10,6 +10,7 @@ import { speakingRoutes } from './speaking.js';
 import { speechRoutes } from './speech.js';
 import { feedbackRoutes } from './feedback.js';
 import { logRoutes } from './log.js';
+import { summaryRoutes } from './summary.js';
 
 const routes = new Hono();
 
@@ -21,5 +22,6 @@ routes.route('/speaking', speakingRoutes);
 routes.route('/speech', speechRoutes);
 routes.route('/feedback', feedbackRoutes);
 routes.route('/log', logRoutes);
+routes.route('/summary', summaryRoutes);
 
 export { routes };

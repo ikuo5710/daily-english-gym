@@ -129,6 +129,30 @@ export interface LogDetailResponse {
   sessions: SessionDetail[];
 }
 
+// ==================== Summary API ====================
+
+/** GET /api/summary/streak レスポンス */
+export interface StreakResponse {
+  streakDays: number;
+  lastLearningDate: string | null;
+}
+
+/** 週間サマリーの分析結果 */
+export interface WeeklyAnalysis {
+  commonExpressions: string[];
+  areasForImprovement: string[];
+  advice: string;
+}
+
+/** GET /api/summary/weekly レスポンス */
+export interface WeeklySummaryResponse {
+  weekStart: string;
+  weekEnd: string;
+  learningDays: number;
+  topics: string[];
+  analysis: WeeklyAnalysis | null;
+}
+
 // ==================== Error Response ====================
 
 /** エラーレスポンス */

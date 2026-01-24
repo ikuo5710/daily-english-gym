@@ -14,6 +14,8 @@ import type {
   SaveLogResponse,
   LogListResponse,
   LogDetailResponse,
+  StreakResponse,
+  WeeklySummaryResponse,
   ErrorResponse,
 } from '@daily-english-gym/shared';
 
@@ -340,6 +342,38 @@ export function useApi() {
     }
   }
 
+  /**
+   * 連続学習日数を取得する
+   */
+  async function getStreak(): Promise<StreakResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      return await fetchJson<StreakResponse>('/api/summary/streak');
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * 週間サマリーを取得する
+   */
+  async function getWeeklySummary(): Promise<WeeklySummaryResponse> {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      return await fetchJson<WeeklySummaryResponse>('/api/summary/weekly');
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : '不明なエラーが発生しました';
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   return {
     isLoading,
     error,
@@ -355,5 +389,7 @@ export function useApi() {
     getTtsAudioFile,
     getLogList,
     getLogDetail,
+    getStreak,
+    getWeeklySummary,
   };
 }

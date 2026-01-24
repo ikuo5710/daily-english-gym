@@ -1,9 +1,26 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSessionStore } from '@/stores/session';
+import { useApi } from '@/composables/useApi';
 
 const router = useRouter();
 const sessionStore = useSessionStore();
+const api = useApi();
+
+const streakDays = ref<number>(0);
+const isLoadingStreak = ref(true);
+
+onMounted(async () => {
+  try {
+    const result = await api.getStreak();
+    streakDays.value = result.streakDays;
+  } catch (e) {
+    console.error('Failed to load streak:', e);
+  } finally {
+    isLoadingStreak.value = false;
+  }
+});
 
 function startLearning() {
   sessionStore.resetSession();
@@ -12,6 +29,10 @@ function startLearning() {
 
 function goToHistory() {
   router.push('/history');
+}
+
+function goToSummary() {
+  router.push('/summary');
 }
 </script>
 
@@ -24,9 +45,20 @@ function goToHistory() {
       </p>
     </div>
 
+    <div v-if="!isLoadingStreak && streakDays > 0" class="streak-section">
+      <div class="streak-badge">
+        <span class="streak-icon">🔥</span>
+        <span class="streak-count">{{ streakDays }}</span>
+        <span class="streak-label">日連続</span>
+      </div>
+    </div>
+
     <div class="action-section">
       <button class="start-button" @click="startLearning">今日の学習を始める</button>
-      <button class="history-button" @click="goToHistory">履歴を見る</button>
+      <div class="secondary-buttons">
+        <button class="history-button" @click="goToHistory">履歴を見る</button>
+        <button class="summary-button" @click="goToSummary">週間サマリー</button>
+      </div>
     </div>
 
     <div class="features">
@@ -88,6 +120,36 @@ function goToHistory() {
   max-width: 500px;
 }
 
+.streak-section {
+  margin-bottom: 1.5rem;
+}
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ff9a56 0%, #ff6b35 100%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.streak-icon {
+  font-size: 1.5rem;
+}
+
+.streak-count {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+}
+
+.streak-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .action-section {
   display: flex;
   flex-direction: column;
@@ -119,8 +181,14 @@ function goToHistory() {
   transform: translateY(0);
 }
 
-.history-button {
-  padding: 0.75rem 2rem;
+.secondary-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.history-button,
+.summary-button {
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
   background: transparent;
@@ -133,7 +201,8 @@ function goToHistory() {
     color 0.2s;
 }
 
-.history-button:hover {
+.history-button:hover,
+.summary-button:hover {
   background-color: #667eea;
   color: white;
 }

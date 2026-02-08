@@ -11,8 +11,9 @@ Guidelines:
 - Keep the main ideas and facts from the original
 - Use present simple and past simple tenses mainly
 - Break complex ideas into multiple simple sentences
-- **IMPORTANT: Keep the output under 450 words maximum (approximately 2500 characters)**
+- **CRITICAL: You MUST keep the output under 350 words maximum (strictly under 2500 characters). This is a hard limit that cannot be exceeded.**
 - Focus on the most important points if the original is very long
+- If the article is long, summarize aggressively to stay within the word limit
 
 Output ONLY the simplified English text. No explanations or notes.`;
 
